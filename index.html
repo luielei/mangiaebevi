@@ -14,16 +14,27 @@
       width: 100%;
       margin-top: 2rem;
     }
-    h1 {
+    h1, h2 {
       text-align: center;
     }
     .highlight {
       background-color: #d4edda !important;
     }
+    #chart-container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 3rem auto;
+    }
   </style>
 </head>
 <body>
   <h1>Classifica Spese Squadre</h1>
+
+  <div id="chart-container">
+    <h2>Grafico Spese per Squadra</h2>
+    <canvas id="speseChart"></canvas>
+  </div>
+
   <table id="classifica">
     <thead>
       <tr><th>Squadra</th><th>Totale spese (CHF)</th></tr>
@@ -33,6 +44,7 @@
 
   <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     async function caricaClassifica() {
       const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQcZDOYWTKkrHE2XdYCESlF3t4_Z_w_X5ZGmmdnm5mpr1AhJbCehMq-jITzPGCC-jdRe3OibWzdr-BF/pub?gid=0&single=true&output=csv";
@@ -53,15 +65,37 @@
 
       totals.sort((a, b) => b.totale - a.totale);
 
+      // Popola la tabella
       const tbody = document.querySelector("#classifica tbody");
+      tbody.innerHTML = '';
       totals.forEach((t, idx) => {
         const tr = document.createElement("tr");
         if (idx === 0) tr.classList.add("highlight");
         tr.innerHTML = `<td>${t.squadra}</td><td>${t.totale.toFixed(2)}</td>`;
         tbody.appendChild(tr);
       });
-
       new DataTable('#classifica');
+
+      // Crea il grafico
+      const ctx = document.getElementById('speseChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: totals.map(t => t.squadra),
+          datasets: [{
+            label: 'Spese CHF',
+            data: totals.map(t => t.totale),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          scales: {
+            x: { beginAtZero: true }
+          }
+        }
+      });
     }
 
     caricaClassifica();
