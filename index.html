@@ -25,6 +25,11 @@
       max-width: 1000px;
       margin: 3rem auto;
     }
+    @media (max-width: 768px) {
+      canvas#speseChart {
+        height: 400px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -94,8 +99,14 @@
         options: {
           indexAxis: 'y',
           responsive: true,
+          maintainAspectRatio: false,
           scales: {
             x: { beginAtZero: true }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
           }
         }
       });
