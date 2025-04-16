@@ -20,16 +20,21 @@
     .highlight {
       background-color: #d4edda !important;
     }
-    #chart-container {
-      width: 100%;
-      max-width: 1000px;
-      margin: 3rem auto;
-    }
-    @media (max-width: 768px) {
-      canvas#speseChart {
-        height: 400px !important;
-      }
-    }
+#chart-container {
+  width: 100%;
+  max-width: 1000px;
+  height: 350px; /* Fissa l'altezza */
+  margin: 3rem auto;
+  position: relative;
+}
+
+canvas#speseChart {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+}}
   </style>
 
   <!-- Librerie esterne -->
