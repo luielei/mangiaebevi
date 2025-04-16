@@ -97,9 +97,13 @@ const db = firebase.database(); // funziona ORA perché l’URL è nel config
         tr.innerHTML = `<td>${t.squadra}</td><td>${t.totale.toFixed(2)}</td>`;
         tbody.appendChild(tr);
       });
-      new DataTable('#classifica', {
-        order: [[1, 'desc']]
-      });
+      if ($.fn.dataTable.isDataTable('#classifica')) {
+  $('#classifica').DataTable().clear().destroy();
+}
+
+new DataTable('#classifica', {
+  order: [[1, 'desc']]
+});
 
       // Grafico top 5
       const top5 = totals.slice(0, 5);
