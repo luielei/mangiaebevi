@@ -89,14 +89,23 @@ const db = firebase.database(); // funziona ORA perché l’URL è nel config
       totals.sort((a, b) => b.totale - a.totale);
 
       // Popola la tabella
-      const tbody = document.querySelector("#classifica tbody");
-      tbody.innerHTML = '';
-      totals.forEach((t, idx) => {
-        const tr = document.createElement("tr");
-        if (idx === 0) tr.classList.add("highlight");
-        tr.innerHTML = `<td>${t.squadra}</td><td>${t.totale.toFixed(2)}</td>`;
-        tbody.appendChild(tr);
-      });
+if ($.fn.dataTable.isDataTable('#classifica')) {
+  $('#classifica').DataTable().clear().destroy();
+}
+
+const tbody = document.querySelector("#classifica tbody");
+tbody.innerHTML = '';
+totals.forEach((t, idx) => {
+  const tr = document.createElement("tr");
+  if (idx === 0) tr.classList.add("highlight");
+  tr.innerHTML = `<td>${t.squadra}</td><td>${t.totale.toFixed(2)}</td>`;
+  tbody.appendChild(tr);
+});
+
+$('#classifica').DataTable({
+  order: [[1, 'desc']]
+});
+
       if ($.fn.dataTable.isDataTable('#classifica')) {
   $('#classifica').DataTable().clear().destroy();
 }
