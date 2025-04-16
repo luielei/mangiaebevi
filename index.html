@@ -72,8 +72,7 @@ const firebaseConfig = {
     // Inizializza Firebase
     firebase.initializeApp(firebaseConfig);
 // Aggiungi l'URL del database corretto:
-const db = firebase.database("https://mangiaebevi-2025-default-rtdb.europe-west1.firebasedatabase.app/");
-
+const db = firebase.database(); // funziona ORA perché l’URL è nel config
 
     const dbRef = db.ref("spese");
     dbRef.on("value", (snapshot) => {
