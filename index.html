@@ -23,13 +23,13 @@
 #chart-container {
   width: 100%;
   max-width: 1000px;
+  height: 300px; /* FISSA l'altezza anche su desktop */
   margin: 3rem auto;
 }
 
 canvas#speseChart {
-  height: 300px;
+  height: 100% !important;
 }
-
 @media (max-width: 768px) {
   canvas#speseChart {
     height: 400px !important;
@@ -127,6 +127,7 @@ new DataTable('#classifica', {
           indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
+          responsive: true
           scales: {
             x: { beginAtZero: true }
           },
