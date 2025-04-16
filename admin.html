@@ -81,18 +81,31 @@
     let squadraCorrente = "";
 
     // Carica squadre nel menu
-    speseRef.once("value", (snap) => {
-      const data = snap.val();
-      Object.keys(data).forEach((squadra) => {
-        const option = document.createElement("option");
-        option.value = squadra;
-        option.textContent = squadra.replace(/_/g, " ").toUpperCase();
-        select.appendChild(option);
-      });
-      squadraCorrente = select.value;
-      speseSquadra = data[squadraCorrente] || [];
-      aggiornaTabella();
-    });
+// Carica lista da "squadre" e poi leggi spese
+firebase.database().ref("squadre").once("value", (snap) => {
+  const squadre = snap.val() || {};
+  Object.keys(squadre).forEach((squadra) => {
+    const option = document.createElement("option");
+    option.value = squadra;
+    option.textContent = squadra.replace(/_/g, " ").toUpperCase();
+    select.appendChild(option);
+  });
+
+  squadraCorrente = select.value;
+  caricaSpeseSquadra(squadraCorrente);
+});
+
+function caricaSpeseSquadra(squadra) {
+  speseRef.child(squadra).once("value", (snap) => {
+    speseSquadra = snap.val() || [];
+    aggiornaTabella();
+  });
+}
+
+select.addEventListener("change", () => {
+  squadraCorrente = select.value;
+  caricaSpeseSquadra(squadraCorrente);
+});
 
     // Cambia squadra
     select.addEventListener("change", () => {
