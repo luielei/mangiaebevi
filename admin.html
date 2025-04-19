@@ -8,7 +8,6 @@
     body {
       font-family: sans-serif;
       padding: 2rem;
-      display: none;
     }
     .hidden { display: none; }
     label, select, input, button {
@@ -26,10 +25,22 @@
     }
   </style>
 
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 </head>
 <body>
+
+<div id="loginBox">
+  <h2>Accesso Admin</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <p id="loginError" style="color: red;"></p>
+</div>
+
+<div id="adminBox" class="hidden">
   <h1>Admin - Coppa Mangia e Bevi 2025</h1>
 
   <label for="squadra">Seleziona squadra:</label>
@@ -46,102 +57,98 @@
     <thead><tr><th>#</th><th>Importo</th></tr></thead>
     <tbody></tbody>
   </table>
+</div>
 
-  <script>
-    // Protezione semplice con password
-    const PASSWORD = "kevin78";
-    const userPassword = prompt("Inserisci la password:");
-    if (userPassword !== PASSWORD) {
-      alert("Accesso negato");
-      document.body.innerHTML = "<h2>Accesso negato</h2>";
-      throw new Error("Accesso negato");
-    } else {
-      document.body.style.display = "block";
-    }
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDfZJSUEUjG6-qci54dZMq-EzjxRHbfgXQ",
+    authDomain: "mangiaebevi-2025.firebaseapp.com",
+    databaseURL: "https://mangiaebevi-2025-default-rtdb.europe-west1.firebasedatabase.app/",
+    projectId: "mangiaebevi-2025",
+    storageBucket: "mangiaebevi-2025.firebasestorage.app",
+    messagingSenderId: "549316049300",
+    appId: "1:549316049300:web:4d999af64d9e7b8ea97781"
+  };
 
-    // Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyDfZJSUEUjG6-qci54dZMq-EzjxRHbfgXQ",
-      authDomain: "mangiaebevi-2025.firebaseapp.com",
-      databaseURL: "https://mangiaebevi-2025-default-rtdb.europe-west1.firebasedatabase.app/",
-      projectId: "mangiaebevi-2025",
-      storageBucket: "mangiaebevi-2025.firebasestorage.app",
-      messagingSenderId: "549316049300",
-      appId: "1:549316049300:web:4d999af64d9e7b8ea97781"
-    };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const speseRef = db.ref("spese");
+  const loginBox = document.getElementById("loginBox");
+  const adminBox = document.getElementById("adminBox");
+  const loginError = document.getElementById("loginError");
 
-    const select = document.getElementById("squadra");
-    const tabella = document.getElementById("tabellaSpese").querySelector("tbody");
-
-    let speseSquadra = [];
-    let squadraCorrente = "";
-
-    // Carica squadre nel menu
-// Carica lista da "squadre" e poi leggi spese
-firebase.database().ref("squadre").once("value", (snap) => {
-  const squadre = snap.val() || {};
-  Object.keys(squadre).forEach((squadra) => {
-    const option = document.createElement("option");
-    option.value = squadra;
-    option.textContent = squadra.replace(/_/g, " ").toUpperCase();
-    select.appendChild(option);
-  });
-
-  squadraCorrente = select.value;
-  caricaSpeseSquadra(squadraCorrente);
-});
-
-function caricaSpeseSquadra(squadra) {
-  speseRef.child(squadra).once("value", (snap) => {
-    speseSquadra = snap.val() || [];
-    aggiornaTabella();
-  });
-}
-
-select.addEventListener("change", () => {
-  squadraCorrente = select.value;
-  caricaSpeseSquadra(squadraCorrente);
-});
-
-    // Cambia squadra
-    select.addEventListener("change", () => {
-      squadraCorrente = select.value;
-      speseRef.child(squadraCorrente).once("value", (snap) => {
-        speseSquadra = snap.val() || [];
-        aggiornaTabella();
+  function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        loginBox.classList.add("hidden");
+        adminBox.classList.remove("hidden");
+        inizializzaAdmin();
+      })
+      .catch((error) => {
+        loginError.textContent = "Errore: " + error.message;
       });
+  }
+
+  const speseRef = db.ref("spese");
+  const select = document.getElementById("squadra");
+  const tabella = document.getElementById("tabellaSpese").querySelector("tbody");
+
+  let speseSquadra = [];
+  let squadraCorrente = "";
+
+  function inizializzaAdmin() {
+    firebase.database().ref("squadre").once("value", (snap) => {
+      const squadre = snap.val() || {};
+      Object.keys(squadre).forEach((squadra) => {
+        const option = document.createElement("option");
+        option.value = squadra;
+        option.textContent = squadra.replace(/_/g, " ").toUpperCase();
+        select.appendChild(option);
+      });
+
+      squadraCorrente = select.value;
+      caricaSpeseSquadra(squadraCorrente);
     });
 
-    // Aggiungi spesa
-    function aggiungiSpesa() {
-      const valore = parseFloat(document.getElementById("spesa").value);
-      if (!isNaN(valore)) {
-        speseSquadra.push(valore);
-        speseRef.child(squadraCorrente).set(speseSquadra);
-        document.getElementById("spesa").value = "";
-        aggiornaTabella();
-      }
-    }
+    select.addEventListener("change", () => {
+      squadraCorrente = select.value;
+      caricaSpeseSquadra(squadraCorrente);
+    });
+  }
 
-    // Rimuovi ultima spesa
-    function rimuoviUltima() {
-      speseSquadra.pop();
+  function caricaSpeseSquadra(squadra) {
+    speseRef.child(squadra).once("value", (snap) => {
+      speseSquadra = snap.val() || [];
+      aggiornaTabella();
+    });
+  }
+
+  function aggiungiSpesa() {
+    const valore = parseFloat(document.getElementById("spesa").value);
+    if (!isNaN(valore)) {
+      speseSquadra.push(valore);
       speseRef.child(squadraCorrente).set(speseSquadra);
+      document.getElementById("spesa").value = "";
       aggiornaTabella();
     }
+  }
 
-    // Mostra tabella spese
-    function aggiornaTabella() {
-      tabella.innerHTML = "";
-      speseSquadra.forEach((val, idx) => {
-        const row = `<tr><td>${idx + 1}</td><td>${val.toFixed(2)}</td></tr>`;
-        tabella.innerHTML += row;
-      });
-    }
-  </script>
+  function rimuoviUltima() {
+    speseSquadra.pop();
+    speseRef.child(squadraCorrente).set(speseSquadra);
+    aggiornaTabella();
+  }
+
+  function aggiornaTabella() {
+    tabella.innerHTML = "";
+    speseSquadra.forEach((val, idx) => {
+      const row = `<tr><td>${idx + 1}</td><td>${val.toFixed(2)}</td></tr>`;
+      tabella.innerHTML += row;
+    });
+  }
+</script>
 </body>
 </html>
