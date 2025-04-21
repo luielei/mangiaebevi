@@ -96,7 +96,7 @@ const db = firebase.database(); // funziona ORA perché l’URL è nel config
       // Popola la tabella
       const tbody = document.querySelector("#classifica tbody");
       tbody.innerHTML = '';
-      totals.forEach((t, idx) => {
+      totals.slice(0, 5).forEach((t, idx) => {
         const tr = document.createElement("tr");
         if (idx === 0) tr.classList.add("highlight");
         tr.innerHTML = `<td>${t.squadra}</td><td>${t.totale.toFixed(2)}</td>`;
